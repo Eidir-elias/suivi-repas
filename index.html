@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>suivi nutritionnel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <p class="nom-utilisateur">ELIAS Daniel</p>
+
+    <h1>
+        <button id="btn-jour-prec" type="button">◀</button>
+        <span id="date-affichage"></span>
+        <button id="btn-jour-suiv" type="button">▶</button>
+    </h1>
+
+    <form id="formulaire-article">
+        <label for="select-repas">Repas</label>
+        <select id="select-repas"></select> 
+
+        <label for="aliment">Aliment</label>
+        <input id="aliment" type="text" placeholder="Ex: Blanc de poulet">
+
+        <label for="grammes">Grammes (g)</label>
+        <input id="grammes" type="number" step="0.01" min="0" placeholder="Ex: 150">
+
+        <label for="calories">Kcal / 100 g</label>
+        <input id="calories" type="number" step="0.01" min="0" placeholder="200">
+
+        <label for="proteines">Protéines / 100 g</label>
+        <input id="proteines" type="number" step="0.01" min="0" placeholder="10">
+
+        <label for="prix-kg">Prix / kg (€)</label>
+        <input id="prix-kg" type="number" step="0.01" min="0" placeholder="Ex: 12.50">
+
+        <button id="btn-ajouter-article" type="button">Ajouter un article</button>
+        <button id="btn-ajouter-repas" type="button">Ajouter un repas</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Aliment</th>
+                <th>g</th>
+                <th>kcal</th>
+                <th>protéines</th>
+                <th>€</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tbody id="liste-articles"></tbody>
+        <tfoot>
+            <tr>
+                <td colspan="6" class="bande-separation"></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="label-total">Total :</td>
+                <td id="total-kcal">0.00</td>
+                <td id="total-prot">0.00</td>
+                <td id="total-prix">0.00</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    
+
+
+    <div id="popup-info" class="popup-cache"></div>
+    <script src="script.js"></script>
+</body>
+</body>
+
+</html>
