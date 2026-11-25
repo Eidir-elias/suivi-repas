@@ -83,13 +83,28 @@
     </table>
 
     <section class="bloc-sauvegarde">
-        <h2>Sauvegarde</h2>
+        <h2>Sauvegarde complète</h2>
+        <p class="aide">Copie de tout (repas + photos) pour pouvoir tout récupérer. Fichier .json, réimportable.</p>
         <p id="info-stockage" class="info-stockage">Calcul de l'espace utilisé…</p>
         <div class="boutons-sauvegarde">
-            <button id="btn-exporter" type="button">⬇ Exporter</button>
+            <button id="btn-exporter" type="button">⬇ Télécharger</button>
+            <button id="btn-partager-sauvegarde" type="button" class="btn-partager">↗ Partager</button>
             <button id="btn-importer" type="button">⬆ Importer</button>
         </div>
         <input id="input-import" type="file" accept="application/json,.json" hidden>
+
+        <h2 class="titre-resume">Résumé lisible (.txt)</h2>
+        <p class="aide">Tableau des aliments, grammes, kcal, protéines et prix. Facile à lire pour toi ou une IA. Ne peut pas être réimporté.</p>
+        <select id="select-periode">
+            <option value="jour">Jour affiché</option>
+            <option value="7">7 derniers jours</option>
+            <option value="30">30 derniers jours</option>
+            <option value="tout">Tout l'historique</option>
+        </select>
+        <div class="boutons-sauvegarde">
+            <button id="btn-resume-telecharger" type="button">⬇ Télécharger</button>
+            <button id="btn-resume-partager" type="button" class="btn-partager">↗ Partager</button>
+        </div>
     </section>
 
     <!-- Champ caché utilisé pour prendre la photo d'un repas -->

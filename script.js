@@ -717,7 +717,33 @@ function blobVersTexte(blob) {
     });
 }
 
-document.getElementById("btn-exporter").addEventListener("click", async function () {
+// Donne un fichier à l'utilisateur : partage (Drive, WhatsApp, mail…) ou téléchargement
+async function livrerFichier(blob, nomFichier, partager) {
+    if (partager) {
+        const fichier = new File([blob], nomFichier, { type: blob.type });
+        if (navigator.canShare && navigator.canShare({ files: [fichier] })) {
+            try {
+                await navigator.share({ files: [fichier], title: nomFichier });
+            } catch (e) {
+                if (e.name !== "AbortError") {
+                    alert("Partage impossible : " + e.message);
+                }
+            }
+            return;
+        }
+        alert("Le partage n'est pas disponible ici : le fichier va être téléchargé.");
+    }
+    const lien = document.createElement("a");
+    lien.href = URL.createObjectURL(blob);
+    lien.download = nomFichier;
+    document.body.appendChild(lien);
+    lien.click();
+    lien.remove();
+    setTimeout(() => URL.revokeObjectURL(lien.href), 10000);
+}
+
+// ---- Sauvegarde complète (.json) ----
+async function exporterSauvegarde(partager) {
     try {
         const jours = await lireTousLesJours();
         const photos = await lireToutesLesPhotos();
@@ -732,18 +758,142 @@ document.getElementById("btn-exporter").addEventListener("click", async function
             jours: jours,
             photos: photosTexte
         };
-        const fichier = new Blob([JSON.stringify(sauvegarde)], { type: "application/json" });
-        const lien = document.createElement("a");
-        lien.href = URL.createObjectURL(fichier);
-        lien.download = `suivi-repas-sauvegarde-${formaterDate(new Date())}.json`;
-        document.body.appendChild(lien);
-        lien.click();
-        lien.remove();
-        setTimeout(() => URL.revokeObjectURL(lien.href), 10000);
+        const blob = new Blob([JSON.stringify(sauvegarde)], { type: "application/json" });
+        await livrerFichier(blob, `suivi-repas-sauvegarde-${formaterDate(new Date())}.json`, partager);
     } catch (e) {
         alert("Erreur pendant l'export : " + e.message);
     }
-});
+}
+
+document.getElementById("btn-exporter").addEventListener("click", () => exporterSauvegarde(false));
+document.getElementById("btn-partager-sauvegarde").addEventListener("click", () => exporterSauvegarde(true));
+
+// ---- Résumé lisible (.txt) ----
+function colonne(texte, largeur, aDroite) {
+    texte = String(texte);
+    if (texte.length > largeur) {
+        texte = texte.slice(0, largeur - 1) + "…";
+    }
+    return aDroite ? texte.padStart(largeur) : texte.padEnd(largeur);
+}
+
+function ligneTableau(nom, g, kcal, prot, prix) {
+    return colonne(nom, 28) + " | " + colonne(g, 6, true) + " | " + colonne(kcal, 7, true)
+        + " | " + colonne(prot, 7, true) + " | " + colonne(prix, 6, true);
+}
+
+async function construireResume(periode) {
+    const tousLesJours = await lireTousLesJours();
+    let jours;
+    let titrePeriode;
+
+    if (periode === "jour") {
+        const date = formaterDate(dateCourante);
+        jours = tousLesJours.filter((j) => j.date === date);
+        titrePeriode = date;
+    } else if (periode === "tout") {
+        jours = tousLesJours;
+        titrePeriode = "tout l'historique";
+    } else {
+        const nbJours = parseInt(periode, 10);
+        const debut = new Date();
+        debut.setDate(debut.getDate() - (nbJours - 1));
+        const dateDebut = formaterDate(debut);
+        const dateFin = formaterDate(new Date());
+        jours = tousLesJours.filter((j) => j.date >= dateDebut && j.date <= dateFin);
+        titrePeriode = `${dateDebut} → ${dateFin} (${nbJours} derniers jours)`;
+    }
+
+    jours.sort((a, b) => a.date.localeCompare(b.date));
+
+    const nomUtilisateur = document.querySelector(".nom-utilisateur").textContent.trim();
+    const lignes = [];
+    lignes.push(`SUIVI REPAS — ${nomUtilisateur}`);
+    lignes.push(`Période : ${titrePeriode}`);
+    lignes.push(`Colonnes : aliment | grammes | kcal | protéines (g) | prix (€)`);
+    lignes.push("");
+
+    let joursAvecDonnees = 0;
+    let sommeKcal = 0;
+    let sommeProt = 0;
+    let sommePrix = 0;
+
+    for (const jour of jours) {
+        const repasRemplis = (jour.repas || []).filter((r) => r.articles && r.articles.length > 0);
+        if (repasRemplis.length === 0) {
+            continue;
+        }
+        joursAvecDonnees++;
+        let jourKcal = 0;
+        let jourProt = 0;
+        let jourPrix = 0;
+
+        lignes.push(`==================== ${jour.date} ====================`);
+        for (const r of repasRemplis) {
+            let rKcal = 0;
+            let rProt = 0;
+            let rPrix = 0;
+            lignes.push(`-- ${r.nom}${r.photoId ? " (avec photo)" : ""} --`);
+            lignes.push(ligneTableau("Aliment", "g", "kcal", "prot", "€"));
+            for (const a of r.articles) {
+                const kcal = (a.grammes * a.kcal100) / 100;
+                const prot = (a.grammes * a.prot100) / 100;
+                const prix = (a.grammes * a.prixKg) / 1000;
+                rKcal += kcal;
+                rProt += prot;
+                rPrix += prix;
+                lignes.push(ligneTableau(a.nom, a.grammes, kcal.toFixed(1), prot.toFixed(1), prix.toFixed(2)));
+            }
+            lignes.push(ligneTableau("Sous-total " + r.nom, "", rKcal.toFixed(1), rProt.toFixed(1), rPrix.toFixed(2)));
+            lignes.push("");
+            jourKcal += rKcal;
+            jourProt += rProt;
+            jourPrix += rPrix;
+        }
+        lignes.push(ligneTableau("TOTAL DU JOUR", "", jourKcal.toFixed(1), jourProt.toFixed(1), jourPrix.toFixed(2)));
+        lignes.push("");
+        sommeKcal += jourKcal;
+        sommeProt += jourProt;
+        sommePrix += jourPrix;
+    }
+
+    if (joursAvecDonnees === 0) {
+        lignes.push("Aucun repas enregistré sur cette période.");
+    } else if (joursAvecDonnees > 1) {
+        lignes.push("==================== BILAN ====================");
+        lignes.push(`Jours avec des repas : ${joursAvecDonnees}`);
+        lignes.push(`Total : ${sommeKcal.toFixed(0)} kcal | ${sommeProt.toFixed(1)} g prot | ${sommePrix.toFixed(2)} €`);
+        lignes.push(`Moyenne par jour : ${(sommeKcal / joursAvecDonnees).toFixed(0)} kcal | `
+            + `${(sommeProt / joursAvecDonnees).toFixed(1)} g prot | ${(sommePrix / joursAvecDonnees).toFixed(2)} €`);
+    }
+
+    return lignes.join("\n");
+}
+
+async function exporterResume(partager) {
+    try {
+        const periode = document.getElementById("select-periode").value;
+        const texte = await construireResume(periode);
+        const blob = new Blob([texte], { type: "text/plain" });
+        const suffixe = periode === "jour" ? formaterDate(dateCourante) : periode + "-jours-" + formaterDate(new Date());
+        const nom = periode === "tout"
+            ? `suivi-repas-resume-tout-${formaterDate(new Date())}.txt`
+            : `suivi-repas-resume-${suffixe}.txt`;
+        await livrerFichier(blob, nom, partager);
+    } catch (e) {
+        alert("Erreur pendant la création du résumé : " + e.message);
+    }
+}
+
+document.getElementById("btn-resume-telecharger").addEventListener("click", () => exporterResume(false));
+document.getElementById("btn-resume-partager").addEventListener("click", () => exporterResume(true));
+
+// Les boutons "Partager" n'apparaissent que si le téléphone sait partager des fichiers
+if (!navigator.canShare) {
+    for (const btn of document.querySelectorAll(".btn-partager")) {
+        btn.classList.add("cache");
+    }
+}
 
 document.getElementById("btn-importer").addEventListener("click", function () {
     inputImport.value = "";

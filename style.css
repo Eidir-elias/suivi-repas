@@ -622,3 +622,27 @@ tfoot td.bande-separation {
     font-weight: 700;
     cursor: pointer;
 }
+
+.bloc-sauvegarde .aide {
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.titre-resume {
+    margin-top: 22px;
+}
+
+#select-periode {
+    width: 100%;
+    padding: 11px 12px;
+    font-size: 16px;
+    background-color: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 9px;
+    margin-bottom: 10px;
+}
+
+.boutons-sauvegarde button {
+    padding: 12px 6px;
+}
