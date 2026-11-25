@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2563eb">
+    <title>Suivi Repas</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icone-192.png">
+    <link rel="apple-touch-icon" href="icone-192.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <p class="nom-utilisateur">ELIAS Daniel</p>
+
+    <h1>
+        <button id="btn-jour-prec" type="button">◀</button>
+        <span id="date-affichage"></span>
+        <button id="btn-jour-suiv" type="button">▶</button>
+    </h1>
+
+    <div class="resume-haut">
+        <div class="resume-case resume-kcal"><span id="haut-kcal">0</span><small>kcal</small></div>
+        <div class="resume-case resume-prot"><span id="haut-prot">0</span><small>g prot</small></div>
+        <div class="resume-case resume-prix"><span id="haut-prix">0.00</span><small>€</small></div>
+    </div>
+
+    <form id="formulaire-article">
+        <button id="btn-scanner" type="button">▦ Scanner un code-barres</button>
+        <p id="message-produit" class="message-produit cache"></p>
+
+        <label for="select-repas">Repas</label>
+        <select id="select-repas"></select>
+
+        <label for="aliment">Aliment</label>
+        <div class="champ-avec-effacer">
+            <input id="aliment" type="text" placeholder="Ex: Blanc de poulet">
+            <button id="btn-effacer-aliment" type="button" class="btn-effacer cache" aria-label="Effacer le nom">✕</button>
+        </div>
+
+        <label for="grammes">Grammes (g)</label>
+        <input id="grammes" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 150">
+
+        <label for="calories">Kcal / 100 g</label>
+        <input id="calories" type="number" inputmode="decimal" step="any" min="0" placeholder="200">
+
+        <label for="proteines">Protéines / 100 g</label>
+        <input id="proteines" type="number" inputmode="decimal" step="any" min="0" placeholder="10">
+
+        <label for="prix-kg">Prix / kg (€)</label>
+        <input id="prix-kg" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 12.50">
+
+        <button id="btn-ajouter-article" type="button">Ajouter un article</button>
+        <button id="btn-ajouter-repas" type="button">Ajouter un repas</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Aliment</th>
+                <th>g</th>
+                <th>kcal</th>
+                <th>protéines</th>
+                <th>€</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="liste-articles"></tbody>
+        <tfoot>
+            <tr>
+                <td colspan="6" class="bande-separation"></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="label-total">Total :</td>
+                <td id="total-kcal">0.00</td>
+                <td id="total-prot">0.00</td>
+                <td id="total-prix">0.00 €</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <section class="bloc-sauvegarde">
+        <h2>Sauvegarde complète</h2>
+        <p class="aide">Copie de tout (repas + photos) pour pouvoir tout récupérer. Réimportable avec le bouton Importer (fichier .json ou la version .txt envoyée par Partager).</p>
+        <p id="info-stockage" class="info-stockage">Calcul de l'espace utilisé…</p>
+        <div class="boutons-sauvegarde">
+            <button id="btn-exporter" type="button">⬇ Télécharger</button>
+            <button id="btn-partager-sauvegarde" type="button" class="btn-partager">↗ Partager</button>
+            <button id="btn-importer" type="button">⬆ Importer</button>
+        </div>
+        <input id="input-import" type="file" accept="application/json,.json,text/plain,.txt" hidden>
+
+        <h2 class="titre-resume">Résumé lisible (.txt)</h2>
+        <p class="aide">Tableau des aliments, grammes, kcal, protéines et prix. Facile à lire pour toi ou une IA. Ne peut pas être réimporté.</p>
+        <select id="select-periode">
+            <option value="jour">Jour affiché</option>
+            <option value="7">7 derniers jours</option>
+            <option value="30">30 derniers jours</option>
+            <option value="tout">Tout l'historique</option>
+        </select>
+        <div class="boutons-sauvegarde">
+            <button id="btn-resume-telecharger" type="button">⬇ Télécharger</button>
+            <button id="btn-resume-partager" type="button" class="btn-partager">↗ Partager</button>
+        </div>
+    </section>
+
+    <!-- Champ caché utilisé pour prendre la photo d'un repas -->
+    <input id="input-photo" type="file" accept="image/*" capture="environment" hidden>
+
+    <!-- Fenêtre du scanner de code-barres -->
+    <div id="fenetre-scanner" class="fenetre cache">
+        <div class="fenetre-contenu">
+            <p id="texte-scanner" class="texte-scanner">Vise le code-barres</p>
+            <video id="video-scanner" playsinline muted></video>
+            <label for="code-manuel">Ou tape le code-barres :</label>
+            <div class="ligne-code-manuel">
+                <input id="code-manuel" type="text" inputmode="numeric" placeholder="Ex: 3017620422003">
+                <button id="btn-code-manuel" type="button">OK</button>
+            </div>
+            <button id="btn-fermer-scanner" type="button" class="btn-fermer">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Fenêtre pour voir une photo en grand -->
+    <div id="fenetre-photo" class="fenetre cache">
+        <div class="fenetre-contenu">
+            <img id="photo-grande" alt="Photo du repas">
+            <div class="boutons-photo">
+                <button id="btn-remplacer-photo" type="button">Remplacer</button>
+                <button id="btn-supprimer-photo" type="button" class="btn-danger">Supprimer</button>
+            </div>
+            <button id="btn-fermer-photo" type="button" class="btn-fermer">Fermer</button>
+        </div>
+    </div>
+
+    <div id="popup-info" class="popup-cache"></div>
+    <script src="script.js"></script>
+</body>
+
+</html>
