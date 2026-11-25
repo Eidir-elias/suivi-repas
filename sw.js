@@ -2,7 +2,7 @@
 // Stratégie : on essaie toujours internet d'abord (pour avoir la dernière version),
 // et si ça échoue (ou si c'est trop lent), on utilise la copie gardée sur le téléphone.
 
-const VERSION = "suivi-repas-v1";
+const VERSION = "suivi-repas-v2";
 
 const FICHIERS = [
     "./",

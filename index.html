@@ -21,6 +21,12 @@
         <button id="btn-jour-suiv" type="button">▶</button>
     </h1>
 
+    <div class="resume-haut">
+        <div class="resume-case resume-kcal"><span id="haut-kcal">0</span><small>kcal</small></div>
+        <div class="resume-case resume-prot"><span id="haut-prot">0</span><small>g prot</small></div>
+        <div class="resume-case resume-prix"><span id="haut-prix">0.00</span><small>€</small></div>
+    </div>
+
     <form id="formulaire-article">
         <button id="btn-scanner" type="button">▦ Scanner un code-barres</button>
         <p id="message-produit" class="message-produit cache"></p>
@@ -29,7 +35,10 @@
         <select id="select-repas"></select>
 
         <label for="aliment">Aliment</label>
-        <input id="aliment" type="text" placeholder="Ex: Blanc de poulet">
+        <div class="champ-avec-effacer">
+            <input id="aliment" type="text" placeholder="Ex: Blanc de poulet">
+            <button id="btn-effacer-aliment" type="button" class="btn-effacer cache" aria-label="Effacer le nom">✕</button>
+        </div>
 
         <label for="grammes">Grammes (g)</label>
         <input id="grammes" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 150">

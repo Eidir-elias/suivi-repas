@@ -563,3 +563,62 @@ tfoot td.bande-separation {
     border-radius: 10px;
     cursor: pointer;
 }
+
+/* Total affiché en haut, sous la date */
+.resume-haut {
+    display: flex;
+    gap: 8px;
+    margin: -8px 0 18px;
+}
+
+.resume-case {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    padding: 10px 6px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.resume-case span {
+    font-size: 20px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.resume-case small {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.resume-kcal span { color: #ea580c; }
+.resume-prot span { color: #3321bc; }
+.resume-prix span { color: #09b82c; }
+
+/* Petit ✕ dans le champ Aliment */
+.champ-avec-effacer {
+    position: relative;
+}
+
+#formulaire-article .champ-avec-effacer input {
+    padding-right: 42px;
+}
+
+.btn-effacer {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background-color: #cbd5e1;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}

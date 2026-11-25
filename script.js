@@ -30,6 +30,21 @@ for (const input of tousLesInputs) {
     input.dataset.original = input.placeholder;
 }
 
+// Petit ✕ dans le champ "Aliment" : visible seulement s'il y a du texte
+const btnEffacerAliment = document.getElementById("btn-effacer-aliment");
+
+function mettreAJourBoutonEffacer() {
+    btnEffacerAliment.classList.toggle("cache", inputAliment.value === "");
+}
+
+inputAliment.addEventListener("input", mettreAJourBoutonEffacer);
+
+btnEffacerAliment.addEventListener("click", function () {
+    inputAliment.value = "";
+    mettreAJourBoutonEffacer();
+    inputAliment.focus();
+});
+
 // =====================================================================
 // 2. Données en mémoire
 // =====================================================================
@@ -150,6 +165,9 @@ async function sauvegarder() {
 // =====================================================================
 function marquerErreur(input, message) {
     input.value = "";
+    if (input === inputAliment) {
+        btnEffacerAliment.classList.add("cache");
+    }
     input.placeholder = message;
     input.classList.add("erreur");
 }
@@ -266,17 +284,22 @@ function afficher() {
             afficherPopup(e, resume, true);
         });
 
-        // Bouton photo (à gauche du bandeau)
+        // Bouton photo (à gauche du bandeau) : 📷 = prendre une photo, 🖼️ = voir la photo
         const btnPhoto = document.createElement("button");
         btnPhoto.type = "button";
         btnPhoto.className = "btn-photo-repas";
-        btnPhoto.textContent = "📷";
-        btnPhoto.title = "Photo du repas";
+        const aUnePhoto = Boolean(repas[m].photoId);
+        btnPhoto.textContent = aUnePhoto ? "🖼️" : "📷";
+        btnPhoto.title = aUnePhoto ? "Voir la photo" : "Prendre une photo";
         btnPhoto.addEventListener("click", function (e) {
             e.stopPropagation();
-            repasPourPhoto = m;
-            inputPhoto.value = "";
-            inputPhoto.click();
+            if (repas[m].photoId) {
+                ouvrirPhoto(m);
+            } else {
+                repasPourPhoto = m;
+                inputPhoto.value = "";
+                inputPhoto.click();
+            }
         });
         tdBandeau.appendChild(btnPhoto);
 
@@ -312,24 +335,6 @@ function afficher() {
 
         trBandeau.appendChild(tdBandeau);
         listeArticles.appendChild(trBandeau);
-
-        // Photo du repas (miniature)
-        if (repas[m].photoId) {
-            const trPhoto = document.createElement("tr");
-            const tdPhoto = document.createElement("td");
-            tdPhoto.colSpan = 6;
-            tdPhoto.className = "cellule-photo";
-            const img = document.createElement("img");
-            img.className = "miniature-repas";
-            img.alt = "Photo de " + repas[m].nom;
-            img.addEventListener("click", function () {
-                ouvrirPhoto(m);
-            });
-            chargerImage(img, repas[m].photoId);
-            tdPhoto.appendChild(img);
-            trPhoto.appendChild(tdPhoto);
-            listeArticles.appendChild(trPhoto);
-        }
 
         // Articles du repas
         const articlesDuRepas = repas[m].articles;
@@ -395,6 +400,11 @@ function afficher() {
     document.getElementById("total-kcal").textContent = totalKcal.toFixed(2);
     document.getElementById("total-prot").textContent = totalProt.toFixed(2);
     document.getElementById("total-prix").textContent = totalPrix.toFixed(2) + " €";
+
+    // Le même total, affiché en haut sous la date
+    document.getElementById("haut-kcal").textContent = Math.round(totalKcal);
+    document.getElementById("haut-prot").textContent = totalProt.toFixed(1);
+    document.getElementById("haut-prix").textContent = totalPrix.toFixed(2);
 }
 
 // =====================================================================
@@ -461,6 +471,7 @@ bouton.addEventListener("click", async function () {
     for (const input of tousLesInputs) {
         input.value = "";
     }
+    mettreAJourBoutonEffacer();
     messageProduit.classList.add("cache");
 });
 
@@ -536,6 +547,9 @@ function fermerFenetre(fenetre) {
 document.getElementById("btn-fermer-photo").addEventListener("click", () => fermerFenetre(fenetrePhoto));
 
 document.getElementById("btn-remplacer-photo").addEventListener("click", function () {
+    if (!confirm("Es-tu sûr de vouloir remplacer cette photo ?")) {
+        return;
+    }
     inputPhoto.value = "";
     inputPhoto.click();
 });
@@ -666,6 +680,7 @@ async function chercherProduit(code) {
 
         effacerErreurs();
         inputAliment.value = marque ? `${nom} (${marque})` : nom;
+        mettreAJourBoutonEffacer();
         inputCalories.value = kcal !== undefined ? arrondir(kcal) : "";
         inputProteines.value = proteines !== undefined ? arrondir(proteines) : "";
 
