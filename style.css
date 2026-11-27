@@ -753,9 +753,6 @@ tfoot td.bande-separation {
 /* Nom d'un aliment : cliquable pour ouvrir sa fiche */
 #liste-articles td.cellule-nom {
     cursor: pointer;
-    text-decoration: underline;
-    text-decoration-color: #cbd5e1;
-    text-underline-offset: 3px;
 }
 
 #liste-articles td.cellule-nom:active {
