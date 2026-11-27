@@ -1,0 +1,864 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background-color: #f1f5f9;
+    color: #1e293b;
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 20px 14px 40px;
+}
+
+.nom-utilisateur {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+h1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    font-size: 20px;
+    white-space: nowrap;
+    margin-bottom: 18px;
+}
+
+#btn-jour-prec,
+#btn-jour-suiv {
+    background-color: #e2e8f0;
+    color: #0f172a;
+    border: none;
+    border-radius: 8px;
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#btn-jour-prec:hover,
+#btn-jour-suiv:hover {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+#btn-jour-prec:active,
+#btn-jour-suiv:active {
+    transform: scale(0.92);
+}
+
+#formulaire-article {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background-color: #ffffff;
+    padding: 18px;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    margin-bottom: 20px;
+}
+
+#formulaire-article label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin-top: 6px;
+}
+
+#formulaire-article input {
+    width: 100%;
+    padding: 11px 12px;
+    font-size: 16px;
+    color: #0f172a;
+    background-color: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 9px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+#formulaire-article input:focus {
+    background-color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+}
+
+@keyframes secousse {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+#formulaire-article input.erreur,
+.erreur {
+    border: 2px solid #ef4444;
+    background-color: #fef2f2;
+    animation: secousse 0.25s ease;
+}
+
+#btn-ajouter-article {
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+#btn-ajouter-article:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+#btn-ajouter-article:active {
+    transform: translateY(1px) scale(0.99);
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    margin-bottom: 14px;
+    font-size: 14px;
+}
+
+thead th {
+    background-color: #1e293b;
+    color: #f8fafc;
+    font-weight: 600;
+    text-align: left;
+    padding: 11px 8px;
+    font-size: 13px;
+}
+
+th, td {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 8px;
+}
+
+
+.bandeau-repas {
+    position: relative;
+    text-align: center;
+    background: linear-gradient(90deg, #0ea5e9, #2563eb);
+    color: #ffffff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 13px;
+    padding: 9px 36px;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+
+.bandeau-repas:hover {
+    filter: brightness(1.08);
+}
+
+#liste-articles td .btn-suppr-repas {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 5px;
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#liste-articles td .btn-suppr-repas:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+#liste-articles td .btn-suppr-repas:active {
+    transform: translateY(-50%) scale(0.9);
+}
+
+#popup-info.popup-repas {
+    padding: 12px 18px;
+    font-size: 15px;
+    text-align: center;
+}
+
+#liste-articles tr {
+    transition: background-color 0.15s ease;
+}
+
+#liste-articles tr:hover {
+    background-color: #f8fafc;
+}
+
+#liste-articles td:nth-child(1) {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+#liste-articles td:nth-child(3),
+#total-kcal {
+    color: #ea580c;
+    font-weight: 600;
+}
+
+#liste-articles td:nth-child(4),
+#total-prot {
+    color: #3321bc;
+    font-weight: 600;
+}
+
+#liste-articles td:nth-child(5),
+#total-prix {
+    color: #09b82c;
+    font-weight: 600;
+}
+
+.cellule-cliquable {
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.cellule-cliquable:hover {
+    background-color: #e2e8f0;
+}
+
+.cellule-cliquable:active {
+    transform: scale(0.95);
+    background-color: #cbd5e1;
+}
+
+#liste-articles td button {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+#liste-articles td button:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+#liste-articles td button:active {
+    transform: scale(0.9);
+}
+
+tfoot tr {
+    font-weight: 700;
+    background-color: #f8fafc;
+}
+
+tfoot td.bande-separation {
+    padding: 0;
+    height: 10px;
+    background: linear-gradient(90deg, #0ea5e9, #2563eb);
+    border: none;
+}
+
+.label-total {
+    text-align: right;
+    color: #475569;
+}
+
+#btn-ajouter-repas {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #2563eb;
+    background-color: #ffffff;
+    border: 2px dashed #93c5fd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+#btn-ajouter-repas:hover {
+    background-color: #eff6ff;
+    border-color: #2563eb;
+}
+
+#btn-ajouter-repas:active {
+    transform: scale(0.99);
+}
+
+@keyframes apparitionPopup {
+    from {
+        opacity: 0;
+        transform: translateY(4px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+#popup-info {
+    position: fixed;
+    background-color: #0f172a;
+    color: #ffffff;
+    padding: 8px 13px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
+    z-index: 1000;
+    animation: apparitionPopup 0.15s ease-out;
+}
+
+.popup-cache {
+    display: none;
+}
+
+#formulaire-article select {
+    width: 100%;
+    padding: 11px 12px;
+    font-size: 16px;
+    color: #0f172a;
+    background-color: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 9px;
+    outline: none;
+}
+
+#formulaire-article select:focus {
+    background-color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+}
+/* =====================================================================
+   Ajouts : scanner, photos, sauvegarde, fenêtres
+   ===================================================================== */
+.cache {
+    display: none !important;
+}
+
+.cellule-prix,
+#total-prix {
+    white-space: nowrap;
+}
+
+#btn-scanner {
+    width: 100%;
+    padding: 13px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    background-color: #e2e8f0;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#btn-scanner:active {
+    transform: scale(0.99);
+}
+
+.message-produit {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 12px;
+    border-radius: 8px;
+    margin-top: 4px;
+}
+
+.info-produit {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+}
+
+.ok-produit {
+    background-color: #f0fdf4;
+    color: #15803d;
+}
+
+.erreur-produit {
+    background-color: #fef2f2;
+    color: #b91c1c;
+}
+
+/* Bouton photo dans le bandeau d'un repas */
+#liste-articles td .btn-photo-repas {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 5px;
+    width: 26px;
+    height: 22px;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.cellule-photo {
+    padding: 8px;
+    background-color: #f8fafc;
+}
+
+.miniature-repas {
+    display: block;
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* Fenêtres plein écran (scanner et photo) */
+.fenetre {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background-color: rgba(15, 23, 42, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.fenetre-contenu {
+    width: 100%;
+    max-width: 520px;
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.texte-scanner {
+    font-weight: 700;
+    text-align: center;
+}
+
+#video-scanner {
+    width: 100%;
+    max-height: 55vh;
+    border-radius: 10px;
+    background-color: #000000;
+    object-fit: cover;
+}
+
+.ligne-code-manuel {
+    display: flex;
+    gap: 8px;
+}
+
+.ligne-code-manuel input {
+    flex: 1;
+    padding: 11px 12px;
+    font-size: 16px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 9px;
+}
+
+.fenetre-contenu button {
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+.fenetre-contenu .btn-fermer {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.fenetre-contenu .btn-danger {
+    background-color: #ef4444;
+}
+
+#photo-grande {
+    width: 100%;
+    max-height: 65vh;
+    object-fit: contain;
+    border-radius: 10px;
+    background-color: #0f172a;
+}
+
+.boutons-photo {
+    display: flex;
+    gap: 8px;
+}
+
+.boutons-photo button {
+    flex: 1;
+}
+
+/* Bloc sauvegarde */
+.bloc-sauvegarde {
+    background-color: #ffffff;
+    padding: 16px 18px;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.bloc-sauvegarde h2 {
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.info-stockage {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+
+.boutons-sauvegarde {
+    display: flex;
+    gap: 8px;
+}
+
+.boutons-sauvegarde button {
+    flex: 1;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #2563eb;
+    background-color: #eff6ff;
+    border: 1.5px solid #bfdbfe;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* Total affiché en haut, sous la date */
+.resume-haut {
+    display: flex;
+    gap: 8px;
+    margin: -8px 0 18px;
+}
+
+.resume-case {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    padding: 10px 6px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.resume-case span {
+    font-size: 20px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.resume-case small {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.resume-kcal span { color: #ea580c; }
+.resume-prot span { color: #3321bc; }
+.resume-prix span { color: #09b82c; }
+
+/* Petit ✕ dans le champ Aliment */
+.champ-avec-effacer {
+    position: relative;
+}
+
+#formulaire-article .champ-avec-effacer input {
+    padding-right: 42px;
+}
+
+.btn-effacer {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background-color: #cbd5e1;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.bloc-sauvegarde .aide {
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.titre-resume {
+    margin-top: 22px;
+}
+
+#select-periode {
+    width: 100%;
+    padding: 11px 12px;
+    font-size: 16px;
+    background-color: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 9px;
+    margin-bottom: 10px;
+}
+
+.boutons-sauvegarde button {
+    padding: 12px 6px;
+}
+
+/* Boutons principaux sous le total */
+.actions-principales {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+#btn-ouvrir-ajout {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+    cursor: pointer;
+}
+
+#btn-ouvrir-ajout:active {
+    transform: scale(0.99);
+}
+
+.actions-principales #btn-ajouter-repas {
+    margin-top: 0;
+}
+
+/* Fenêtre article : le formulaire devient une fenêtre par-dessus l'appli */
+.fenetre-article {
+    z-index: 1500;
+    align-items: flex-end;
+    padding: 0;
+}
+
+.fenetre-article #formulaire-article {
+    width: 100%;
+    max-width: 540px;
+    max-height: 92vh;
+    overflow-y: auto;
+    margin: 0;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: 24px;
+}
+
+.titre-formulaire {
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
+.boutons-article {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.boutons-article button,
+.btn-annuler {
+    flex: 1;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.btn-vert {
+    color: #ffffff;
+    background-color: #16a34a;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.28);
+}
+
+.btn-rouge {
+    color: #ffffff;
+    background-color: #ef4444;
+}
+
+.btn-annuler {
+    width: 100%;
+    margin-top: 6px;
+    color: #0f172a;
+    background-color: #e2e8f0;
+}
+
+.boutons-article button:active,
+.btn-annuler:active {
+    transform: scale(0.98);
+}
+
+/* Le crayon remplace le ✕ rouge dans chaque ligne */
+#liste-articles td button.btn-modifier {
+    background-color: #e0e7ff;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+#liste-articles td button.btn-modifier:hover {
+    background-color: #c7d2fe;
+    color: #1e293b;
+}
+
+/* Nom d'un aliment : cliquable pour ouvrir sa fiche */
+#liste-articles td.cellule-nom {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: #cbd5e1;
+    text-underline-offset: 3px;
+}
+
+#liste-articles td.cellule-nom:active {
+    background-color: #e2e8f0;
+}
+
+/* Fiche d'un article */
+.fiche-article {
+    position: relative;
+    padding: 20px 18px 18px;
+}
+
+.btn-fermer-fiche {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background-color: #fee2e2 !important;
+    color: #dc2626 !important;
+    font-size: 15px !important;
+}
+
+.fiche-nom {
+    font-size: 21px;
+    padding-right: 40px;
+    line-height: 1.25;
+}
+
+.fiche-repas {
+    color: #64748b;
+    font-weight: 600;
+    margin-top: -4px;
+}
+
+.fiche-grille {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.fiche-titre-colonne {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
+}
+
+.fiche-valeur {
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fafc;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.fiche-valeur small {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.fiche-valeur span {
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.fiche-valeur.kcal span { color: #ea580c; }
+.fiche-valeur.prot span { color: #3321bc; }
+.fiche-valeur.prix span { color: #09b82c; }
+
+/* Bouton ✕ rouge dans la fiche d'un repas */
+.btn-popup-suppr {
+    margin-left: 10px;
+    vertical-align: middle;
+    background-color: #ef4444;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#popup-info.popup-repas {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+#popup-info.popup-repas .btn-popup-suppr {
+    margin-left: 0;
+    flex-shrink: 0;
+}
+
+#popup-info.popup-cache {
+    display: none;
+}

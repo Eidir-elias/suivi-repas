@@ -27,34 +27,46 @@
         <div class="resume-case resume-prix"><span id="haut-prix">0.00</span><small>€</small></div>
     </div>
 
-    <form id="formulaire-article">
-        <button id="btn-scanner" type="button">▦ Scanner un code-barres</button>
-        <p id="message-produit" class="message-produit cache"></p>
-
-        <label for="select-repas">Repas</label>
-        <select id="select-repas"></select>
-
-        <label for="aliment">Aliment</label>
-        <div class="champ-avec-effacer">
-            <input id="aliment" type="text" placeholder="Ex: Blanc de poulet">
-            <button id="btn-effacer-aliment" type="button" class="btn-effacer cache" aria-label="Effacer le nom">✕</button>
-        </div>
-
-        <label for="grammes">Grammes (g)</label>
-        <input id="grammes" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 150">
-
-        <label for="calories">Kcal / 100 g</label>
-        <input id="calories" type="number" inputmode="decimal" step="any" min="0" placeholder="200">
-
-        <label for="proteines">Protéines / 100 g</label>
-        <input id="proteines" type="number" inputmode="decimal" step="any" min="0" placeholder="10">
-
-        <label for="prix-kg">Prix / kg (€)</label>
-        <input id="prix-kg" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 12.50">
-
-        <button id="btn-ajouter-article" type="button">Ajouter un article</button>
+    <div class="actions-principales">
+        <button id="btn-ouvrir-ajout" type="button">＋ Ajouter un article</button>
         <button id="btn-ajouter-repas" type="button">Ajouter un repas</button>
-    </form>
+    </div>
+
+    <!-- Fenêtre d'ajout / de modification d'un article (cachée au départ) -->
+    <div id="fenetre-article" class="fenetre fenetre-article cache">
+        <form id="formulaire-article">
+            <h2 id="titre-formulaire" class="titre-formulaire">Nouvel article</h2>
+            <button id="btn-scanner" type="button">▦ Scanner un code-barres</button>
+            <p id="message-produit" class="message-produit cache"></p>
+
+            <label for="select-repas">Repas</label>
+            <select id="select-repas"></select>
+
+            <label for="aliment">Aliment</label>
+            <div class="champ-avec-effacer">
+                <input id="aliment" type="text" placeholder="Ex: Blanc de poulet">
+                <button id="btn-effacer-aliment" type="button" class="btn-effacer cache" aria-label="Effacer le nom">✕</button>
+            </div>
+
+            <label for="grammes">Grammes (g)</label>
+            <input id="grammes" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 150">
+
+            <label for="calories">Kcal / 100 g</label>
+            <input id="calories" type="number" inputmode="decimal" step="any" min="0" placeholder="200">
+
+            <label for="proteines">Protéines / 100 g</label>
+            <input id="proteines" type="number" inputmode="decimal" step="any" min="0" placeholder="10">
+
+            <label for="prix-kg">Prix / kg (€)</label>
+            <input id="prix-kg" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 12.50">
+
+            <div class="boutons-article">
+                <button id="btn-supprimer-article" type="button" class="btn-rouge cache">✕ Supprimer</button>
+                <button id="btn-valider-article" type="button" class="btn-vert">✓ Ajouter</button>
+            </div>
+            <button id="btn-annuler-article" type="button" class="btn-annuler">Annuler</button>
+        </form>
+    </div>
 
     <table>
         <thead>
@@ -64,20 +76,18 @@
                 <th>kcal</th>
                 <th>protéines</th>
                 <th>€</th>
-                <th></th>
             </tr>
         </thead>
         <tbody id="liste-articles"></tbody>
         <tfoot>
             <tr>
-                <td colspan="6" class="bande-separation"></td>
+                <td colspan="5" class="bande-separation"></td>
             </tr>
             <tr>
                 <td colspan="2" class="label-total">Total :</td>
                 <td id="total-kcal">0.00</td>
                 <td id="total-prot">0.00</td>
                 <td id="total-prix">0.00 €</td>
-                <td></td>
             </tr>
         </tfoot>
     </table>
@@ -125,7 +135,7 @@
     </div>
 
     <!-- Fenêtre pour voir une photo en grand -->
-    <div id="fenetre-photo" class="fenetre cache">
+    <div id="fenetre-photo" class="fenetre ferme-au-clic-exterieur cache">
         <div class="fenetre-contenu">
             <img id="photo-grande" alt="Photo du repas">
             <div class="boutons-photo">
@@ -133,6 +143,31 @@
                 <button id="btn-supprimer-photo" type="button" class="btn-danger">Supprimer</button>
             </div>
             <button id="btn-fermer-photo" type="button" class="btn-fermer">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Fiche d'un article (clic sur son nom dans le tableau) -->
+    <div id="fenetre-fiche" class="fenetre ferme-au-clic-exterieur cache">
+        <div class="fenetre-contenu fiche-article">
+            <button id="btn-fermer-fiche" type="button" class="btn-fermer-fiche" aria-label="Fermer">✕</button>
+            <h2 id="fiche-nom" class="fiche-nom"></h2>
+            <p id="fiche-repas" class="fiche-repas"></p>
+
+            <div class="fiche-grille">
+                <p class="fiche-titre-colonne">Pour 100 g</p>
+                <p class="fiche-titre-colonne">Cette portion</p>
+                <div class="fiche-valeur kcal"><small>Kcal</small><span id="fiche-kcal100"></span></div>
+                <div class="fiche-valeur kcal"><small>Kcal</small><span id="fiche-kcal"></span></div>
+                <div class="fiche-valeur prot"><small>Protéines</small><span id="fiche-prot100"></span></div>
+                <div class="fiche-valeur prot"><small>Protéines</small><span id="fiche-prot"></span></div>
+                <div class="fiche-valeur prix"><small>Prix / kg</small><span id="fiche-prixkg"></span></div>
+                <div class="fiche-valeur prix"><small>Prix</small><span id="fiche-prix"></span></div>
+            </div>
+
+            <div class="boutons-photo">
+                <button id="btn-fiche-modifier" type="button">✏️ Modifier</button>
+                <button id="btn-fiche-supprimer" type="button" class="btn-danger">🗑 Supprimer</button>
+            </div>
         </div>
     </div>
 
