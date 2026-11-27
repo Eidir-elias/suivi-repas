@@ -182,11 +182,23 @@ function effacerErreurs() {
     }
 }
 
-function afficherPopup(evenement, texte, estRepas = false) {
+function afficherPopup(evenement, texte, estRepas = false, actionSupprimer = null) {
     evenement.stopPropagation();
     const rect = evenement.currentTarget.getBoundingClientRect();
 
     popupInfo.textContent = texte;
+    if (actionSupprimer) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-popup-suppr";
+        btn.textContent = "✕";
+        btn.title = "Supprimer ce repas";
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            actionSupprimer();
+        });
+        popupInfo.appendChild(btn);
+    }
     popupInfo.classList.toggle("popup-repas", estRepas);
     popupInfo.classList.remove("popup-cache");
 
@@ -218,6 +230,71 @@ function afficherPopup(evenement, texte, estRepas = false) {
 document.addEventListener("click", function () {
     popupInfo.classList.add("popup-cache");
 });
+
+// Un clic dans la fiche du repas ne doit pas la fermer
+popupInfo.addEventListener("click", (e) => e.stopPropagation());
+
+// =====================================================================
+// Fenêtres : ouverture / fermeture + bouton retour d'Android
+// Chaque fenêtre ouverte ajoute une étape dans l'historique :
+// le bouton retour ferme alors la fenêtre au lieu de quitter l'appli.
+// =====================================================================
+const pileFenetres = [];
+const actionsFermeture = new Map(); // fenêtre -> ce qu'il faut faire en la fermant
+let retoursAIgnorer = 0;
+
+function ouvrirFenetre(fenetre) {
+    if (!fenetre.classList.contains("cache")) {
+        return; // déjà ouverte
+    }
+    fenetre.classList.remove("cache");
+    pileFenetres.push(fenetre);
+    history.pushState({ fenetre: fenetre.id }, "");
+}
+
+// Cache la fenêtre sans toucher à l'historique
+function cacherFenetre(fenetre) {
+    fenetre.classList.add("cache");
+    const position = pileFenetres.indexOf(fenetre);
+    if (position >= 0) {
+        pileFenetres.splice(position, 1);
+    }
+    const nettoyage = actionsFermeture.get(fenetre);
+    if (nettoyage) {
+        nettoyage();
+    }
+}
+
+// Ferme la fenêtre depuis un bouton de l'appli (on retire aussi l'étape d'historique)
+function fermerFenetre(fenetre) {
+    if (fenetre.classList.contains("cache")) {
+        return;
+    }
+    cacherFenetre(fenetre);
+    retoursAIgnorer++;
+    history.back();
+}
+
+window.addEventListener("popstate", function () {
+    if (retoursAIgnorer > 0) {
+        retoursAIgnorer--;
+        return;
+    }
+    // Bouton retour d'Android : on ferme la fenêtre du dessus
+    const fenetreDuDessus = pileFenetres[pileFenetres.length - 1];
+    if (fenetreDuDessus) {
+        cacherFenetre(fenetreDuDessus);
+    }
+});
+
+// Clic à l'extérieur de la fiche ou de la photo : on ferme
+for (const fenetre of document.querySelectorAll(".ferme-au-clic-exterieur")) {
+    fenetre.addEventListener("click", function (e) {
+        if (e.target === fenetre) {
+            fermerFenetre(fenetre);
+        }
+    });
+}
 
 function formaterDate(date) {
     const annee = date.getFullYear();
@@ -278,13 +355,15 @@ function afficher() {
         // Bandeau du repas
         const trBandeau = document.createElement("tr");
         const tdBandeau = document.createElement("td");
-        tdBandeau.colSpan = 6;
+        tdBandeau.colSpan = 5;
         tdBandeau.className = "bandeau-repas";
         tdBandeau.textContent = repas[m].nom;
 
         tdBandeau.addEventListener("click", function (e) {
-            const resume = `${repas[m].nom.toUpperCase()} : ${repasKcal.toFixed(2)} kcal | ${repasProt.toFixed(2)} g prot | ${repasPrix.toFixed(2)} €`;
-            afficherPopup(e, resume, true);
+            const nb = repas[m].articles.length;
+            const resume = `${repasKcal.toFixed(0)} kcal | ${repasProt.toFixed(1)} g prot | `
+                + `${repasPrix.toFixed(2)} € | ${nb} article${nb > 1 ? "s" : ""}`;
+            afficherPopup(e, resume, true, () => supprimerRepas(m));
         });
 
         // Bouton photo (à gauche du bandeau) : 📷 = prendre une photo, 🖼️ = voir la photo
@@ -305,36 +384,6 @@ function afficher() {
             }
         });
         tdBandeau.appendChild(btnPhoto);
-
-        if (repas.length > 1) {
-            const btnSupprRepas = document.createElement("button");
-            btnSupprRepas.textContent = "✕";
-            btnSupprRepas.type = "button";
-            btnSupprRepas.className = "btn-suppr-repas";
-            btnSupprRepas.title = "Supprimer ce repas";
-
-            btnSupprRepas.addEventListener("click", async function (e) {
-                e.stopPropagation();
-                if (!confirm(`Es-tu sûr de vouloir supprimer ${repas[m].nom} ?`)) {
-                    return;
-                }
-                popupInfo.classList.add("popup-cache");
-                const photoId = repas[m].photoId;
-                repas.splice(m, 1);
-                for (let k = 0; k < repas.length; k++) {
-                    repas[k].nom = "repas " + (k + 1);
-                }
-                await sauvegarder();
-                if (photoId) {
-                    await supprimerPhotoBDD(photoId);
-                }
-                mettreAJourSelectRepas();
-                selectRepas.value = Math.min(m, repas.length - 1);
-                afficher();
-            });
-
-            tdBandeau.appendChild(btnSupprRepas);
-        }
 
         trBandeau.appendChild(tdBandeau);
         listeArticles.appendChild(trBandeau);
@@ -359,6 +408,12 @@ function afficher() {
 
             const tdNom = document.createElement("td");
             tdNom.textContent = article.nom;
+            tdNom.classList.add("cellule-nom");
+            tdNom.addEventListener("click", function (e) {
+                e.stopPropagation();
+                popupInfo.classList.add("popup-cache");
+                ouvrirFiche(m, i);
+            });
 
             const tdGrammes = document.createElement("td");
             tdGrammes.textContent = article.grammes;
@@ -384,20 +439,7 @@ function afficher() {
                 afficherPopup(e, article.prixKg.toFixed(2) + " €/kg");
             });
 
-            // Crayon : ouvre la fenêtre de modification de cet article
-            const tdModif = document.createElement("td");
-            const btnModif = document.createElement("button");
-            btnModif.textContent = "✏️";
-            btnModif.type = "button";
-            btnModif.className = "btn-modifier";
-            btnModif.title = "Modifier ou supprimer";
-            btnModif.addEventListener("click", function (e) {
-                e.stopPropagation();
-                ouvrirFormulaireModification(m, i);
-            });
-            tdModif.appendChild(btnModif);
-
-            tr.append(tdNom, tdGrammes, tdKcalCalc, tdProtCalc, tdPrixCalc, tdModif);
+            tr.append(tdNom, tdGrammes, tdKcalCalc, tdProtCalc, tdPrixCalc);
             listeArticles.appendChild(tr);
         }
     }
@@ -433,7 +475,7 @@ function ouvrirFormulaireAjout() {
     titreFormulaire.textContent = "Nouvel article";
     btnValiderArticle.textContent = "✓ Ajouter";
     btnSupprimerArticle.classList.add("cache");
-    fenetreArticle.classList.remove("cache");
+    ouvrirFenetre(fenetreArticle);
 }
 
 function ouvrirFormulaireModification(m, i) {
@@ -447,16 +489,19 @@ function ouvrirFormulaireModification(m, i) {
     inputPrixKg.value = article.prixKg;
     selectRepas.value = m;
     mettreAJourBoutonEffacer();
-    titreFormulaire.textContent = "Modifier l'article";
+    titreFormulaire.textContent = `Modifier l'article (${i + 1}/${repas[m].articles.length})`;
     btnValiderArticle.textContent = "✓ Enregistrer";
     btnSupprimerArticle.classList.remove("cache");
-    fenetreArticle.classList.remove("cache");
+    ouvrirFenetre(fenetreArticle);
 }
 
 function fermerFormulaire() {
     fermerFenetre(fenetreArticle);
-    articleEnModification = null;
 }
+
+actionsFermeture.set(fenetreArticle, function () {
+    articleEnModification = null;
+});
 
 // Vérifie les champs et renvoie l'article, ou null s'il y a une erreur
 function lireFormulaire() {
@@ -522,21 +567,39 @@ btnValiderArticle.addEventListener("click", async function () {
     }
     const repasChoisi = parseInt(selectRepas.value, 10) || 0;
 
+    // --- Mode ajout : on ajoute, on vide les champs, la fenêtre reste ouverte
     if (articleEnModification === null) {
         repas[repasChoisi].articles.push(article);
+        await sauvegarder();
+        afficher();
+        viderFormulaire();
+        afficherMessageProduit(`✓ ${article.nom} ajouté à ${repas[repasChoisi].nom}. Article suivant ?`, "ok-produit");
+        fenetreArticle.querySelector("#formulaire-article").scrollTop = 0;
+        return;
+    }
+
+    // --- Mode modification : on enregistre puis on passe à l'article suivant du même repas
+    const { repas: m, article: i } = articleEnModification;
+    let suivant;
+    if (m === repasChoisi) {
+        repas[m].articles[i] = article;          // même repas : on remplace
+        suivant = i + 1;
     } else {
-        const { repas: m, article: i } = articleEnModification;
-        if (m === repasChoisi) {
-            repas[m].articles[i] = article;          // même repas : on remplace
-        } else {
-            repas[m].articles.splice(i, 1);          // repas changé : on déplace
-            repas[repasChoisi].articles.push(article);
-        }
+        repas[m].articles.splice(i, 1);          // repas changé : on déplace
+        repas[repasChoisi].articles.push(article);
+        suivant = i;                             // l'article suivant a pris sa place
     }
 
     await sauvegarder();
     afficher();
-    fermerFormulaire();
+
+    if (suivant < repas[m].articles.length) {
+        ouvrirFormulaireModification(m, suivant);
+        afficherMessageProduit(`✓ ${article.nom} enregistré. Article suivant :`, "ok-produit");
+        fenetreArticle.querySelector("#formulaire-article").scrollTop = 0;
+    } else {
+        fermerFormulaire();                      // c'était le dernier du repas
+    }
 });
 
 // Bouton rouge ✕ : supprime l'article en cours de modification
@@ -556,6 +619,70 @@ btnSupprimerArticle.addEventListener("click", async function () {
 
 document.getElementById("btn-ouvrir-ajout").addEventListener("click", ouvrirFormulaireAjout);
 document.getElementById("btn-annuler-article").addEventListener("click", fermerFormulaire);
+
+// =====================================================================
+// 6 bis. Fiche d'un article (clic sur son nom)
+// =====================================================================
+const fenetreFiche = document.getElementById("fenetre-fiche");
+let ficheOuverte = null; // { repas: m, article: i }
+
+function ouvrirFiche(m, i) {
+    const a = repas[m].articles[i];
+    ficheOuverte = { repas: m, article: i };
+
+    document.getElementById("fiche-nom").textContent = a.nom;
+    document.getElementById("fiche-repas").textContent = `${repas[m].nom} · ${a.grammes} g`;
+    document.getElementById("fiche-kcal100").textContent = a.kcal100 + " kcal";
+    document.getElementById("fiche-prot100").textContent = a.prot100 + " g";
+    document.getElementById("fiche-prixkg").textContent = a.prixKg.toFixed(2) + " €";
+    document.getElementById("fiche-kcal").textContent = ((a.grammes * a.kcal100) / 100).toFixed(1) + " kcal";
+    document.getElementById("fiche-prot").textContent = ((a.grammes * a.prot100) / 100).toFixed(1) + " g";
+    document.getElementById("fiche-prix").textContent = ((a.grammes * a.prixKg) / 1000).toFixed(2) + " €";
+
+    ouvrirFenetre(fenetreFiche);
+}
+
+document.getElementById("btn-fermer-fiche").addEventListener("click", () => fermerFenetre(fenetreFiche));
+
+document.getElementById("btn-fiche-modifier").addEventListener("click", function () {
+    const { repas: m, article: i } = ficheOuverte;
+    fermerFenetre(fenetreFiche);
+    ouvrirFormulaireModification(m, i);
+});
+
+document.getElementById("btn-fiche-supprimer").addEventListener("click", async function () {
+    const { repas: m, article: i } = ficheOuverte;
+    if (!confirm(`Supprimer « ${repas[m].articles[i].nom} » ?`)) {
+        return;
+    }
+    repas[m].articles.splice(i, 1);
+    await sauvegarder();
+    afficher();
+    fermerFenetre(fenetreFiche);
+});
+
+// Suppression d'un repas (bouton ✕ dans la fiche du repas)
+async function supprimerRepas(m) {
+    if (!confirm(`Es-tu sûr de vouloir supprimer ${repas[m].nom} et tous ses articles ?`)) {
+        return;
+    }
+    popupInfo.classList.add("popup-cache");
+    const photoId = repas[m].photoId;
+    repas.splice(m, 1);
+    if (repas.length === 0) {
+        repas.push({ nom: "repas 1", articles: [], photoId: null });
+    }
+    for (let k = 0; k < repas.length; k++) {
+        repas[k].nom = "repas " + (k + 1);
+    }
+    await sauvegarder();
+    if (photoId) {
+        await supprimerPhotoBDD(photoId);
+    }
+    mettreAJourSelectRepas();
+    selectRepas.value = Math.min(m, repas.length - 1);
+    afficher();
+}
 
 // =====================================================================
 // 7. Ajout d'un repas
@@ -619,12 +746,9 @@ inputPhoto.addEventListener("change", async function () {
 function ouvrirPhoto(indexRepas) {
     repasPourPhoto = indexRepas;
     chargerImage(photoGrande, repas[indexRepas].photoId);
-    fenetrePhoto.classList.remove("cache");
+    ouvrirFenetre(fenetrePhoto);
 }
 
-function fermerFenetre(fenetre) {
-    fenetre.classList.add("cache");
-}
 
 document.getElementById("btn-fermer-photo").addEventListener("click", () => fermerFenetre(fenetrePhoto));
 
@@ -658,7 +782,7 @@ let fluxCamera = null;
 let minuteurScan = null;
 
 async function ouvrirScanner() {
-    fenetreScanner.classList.remove("cache");
+    ouvrirFenetre(fenetreScanner);
     inputCodeManuel.value = "";
 
     if (!("BarcodeDetector" in window)) {
@@ -708,7 +832,7 @@ async function ouvrirScanner() {
     analyser();
 }
 
-function fermerScanner() {
+function arreterCamera() {
     clearTimeout(minuteurScan);
     if (fluxCamera) {
         for (const piste of fluxCamera.getTracks()) {
@@ -717,6 +841,12 @@ function fermerScanner() {
         fluxCamera = null;
     }
     videoScanner.srcObject = null;
+}
+
+// La caméra s'arrête aussi quand on ferme avec le bouton retour
+actionsFermeture.set(fenetreScanner, arreterCamera);
+
+function fermerScanner() {
     fermerFenetre(fenetreScanner);
 }
 
