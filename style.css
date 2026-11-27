@@ -646,3 +646,106 @@ tfoot td.bande-separation {
 .boutons-sauvegarde button {
     padding: 12px 6px;
 }
+
+/* Boutons principaux sous le total */
+.actions-principales {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+#btn-ouvrir-ajout {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+    cursor: pointer;
+}
+
+#btn-ouvrir-ajout:active {
+    transform: scale(0.99);
+}
+
+.actions-principales #btn-ajouter-repas {
+    margin-top: 0;
+}
+
+/* Fenêtre article : le formulaire devient une fenêtre par-dessus l'appli */
+.fenetre-article {
+    z-index: 1500;
+    align-items: flex-end;
+    padding: 0;
+}
+
+.fenetre-article #formulaire-article {
+    width: 100%;
+    max-width: 540px;
+    max-height: 92vh;
+    overflow-y: auto;
+    margin: 0;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: 24px;
+}
+
+.titre-formulaire {
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
+.boutons-article {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.boutons-article button,
+.btn-annuler {
+    flex: 1;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.btn-vert {
+    color: #ffffff;
+    background-color: #16a34a;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.28);
+}
+
+.btn-rouge {
+    color: #ffffff;
+    background-color: #ef4444;
+}
+
+.btn-annuler {
+    width: 100%;
+    margin-top: 6px;
+    color: #0f172a;
+    background-color: #e2e8f0;
+}
+
+.boutons-article button:active,
+.btn-annuler:active {
+    transform: scale(0.98);
+}
+
+/* Le crayon remplace le ✕ rouge dans chaque ligne */
+#liste-articles td button.btn-modifier {
+    background-color: #e0e7ff;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+#liste-articles td button.btn-modifier:hover {
+    background-color: #c7d2fe;
+    color: #1e293b;
+}

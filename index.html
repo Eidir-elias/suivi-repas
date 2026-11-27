@@ -27,34 +27,46 @@
         <div class="resume-case resume-prix"><span id="haut-prix">0.00</span><small>€</small></div>
     </div>
 
-    <form id="formulaire-article">
-        <button id="btn-scanner" type="button">▦ Scanner un code-barres</button>
-        <p id="message-produit" class="message-produit cache"></p>
-
-        <label for="select-repas">Repas</label>
-        <select id="select-repas"></select>
-
-        <label for="aliment">Aliment</label>
-        <div class="champ-avec-effacer">
-            <input id="aliment" type="text" placeholder="Ex: Blanc de poulet">
-            <button id="btn-effacer-aliment" type="button" class="btn-effacer cache" aria-label="Effacer le nom">✕</button>
-        </div>
-
-        <label for="grammes">Grammes (g)</label>
-        <input id="grammes" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 150">
-
-        <label for="calories">Kcal / 100 g</label>
-        <input id="calories" type="number" inputmode="decimal" step="any" min="0" placeholder="200">
-
-        <label for="proteines">Protéines / 100 g</label>
-        <input id="proteines" type="number" inputmode="decimal" step="any" min="0" placeholder="10">
-
-        <label for="prix-kg">Prix / kg (€)</label>
-        <input id="prix-kg" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 12.50">
-
-        <button id="btn-ajouter-article" type="button">Ajouter un article</button>
+    <div class="actions-principales">
+        <button id="btn-ouvrir-ajout" type="button">＋ Ajouter un article</button>
         <button id="btn-ajouter-repas" type="button">Ajouter un repas</button>
-    </form>
+    </div>
+
+    <!-- Fenêtre d'ajout / de modification d'un article (cachée au départ) -->
+    <div id="fenetre-article" class="fenetre fenetre-article cache">
+        <form id="formulaire-article">
+            <h2 id="titre-formulaire" class="titre-formulaire">Nouvel article</h2>
+            <button id="btn-scanner" type="button">▦ Scanner un code-barres</button>
+            <p id="message-produit" class="message-produit cache"></p>
+
+            <label for="select-repas">Repas</label>
+            <select id="select-repas"></select>
+
+            <label for="aliment">Aliment</label>
+            <div class="champ-avec-effacer">
+                <input id="aliment" type="text" placeholder="Ex: Blanc de poulet">
+                <button id="btn-effacer-aliment" type="button" class="btn-effacer cache" aria-label="Effacer le nom">✕</button>
+            </div>
+
+            <label for="grammes">Grammes (g)</label>
+            <input id="grammes" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 150">
+
+            <label for="calories">Kcal / 100 g</label>
+            <input id="calories" type="number" inputmode="decimal" step="any" min="0" placeholder="200">
+
+            <label for="proteines">Protéines / 100 g</label>
+            <input id="proteines" type="number" inputmode="decimal" step="any" min="0" placeholder="10">
+
+            <label for="prix-kg">Prix / kg (€)</label>
+            <input id="prix-kg" type="number" inputmode="decimal" step="any" min="0" placeholder="Ex: 12.50">
+
+            <div class="boutons-article">
+                <button id="btn-supprimer-article" type="button" class="btn-rouge cache">✕ Supprimer</button>
+                <button id="btn-valider-article" type="button" class="btn-vert">✓ Ajouter</button>
+            </div>
+            <button id="btn-annuler-article" type="button" class="btn-annuler">Annuler</button>
+        </form>
+    </div>
 
     <table>
         <thead>
@@ -84,14 +96,14 @@
 
     <section class="bloc-sauvegarde">
         <h2>Sauvegarde complète</h2>
-        <p class="aide">Copie de tout (repas + photos) pour pouvoir tout récupérer. Fichier .json, réimportable.</p>
+        <p class="aide">Copie de tout (repas + photos) pour pouvoir tout récupérer. Réimportable avec le bouton Importer (fichier .json ou la version .txt envoyée par Partager).</p>
         <p id="info-stockage" class="info-stockage">Calcul de l'espace utilisé…</p>
         <div class="boutons-sauvegarde">
             <button id="btn-exporter" type="button">⬇ Télécharger</button>
             <button id="btn-partager-sauvegarde" type="button" class="btn-partager">↗ Partager</button>
             <button id="btn-importer" type="button">⬆ Importer</button>
         </div>
-        <input id="input-import" type="file" accept="application/json,.json" hidden>
+        <input id="input-import" type="file" accept="application/json,.json,text/plain,.txt" hidden>
 
         <h2 class="titre-resume">Résumé lisible (.txt)</h2>
         <p class="aide">Tableau des aliments, grammes, kcal, protéines et prix. Facile à lire pour toi ou une IA. Ne peut pas être réimporté.</p>

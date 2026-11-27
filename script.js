@@ -1,7 +1,10 @@
 // =====================================================================
 // 1. Récupération des éléments HTML
 // =====================================================================
-const bouton = document.getElementById("btn-ajouter-article");
+const fenetreArticle = document.getElementById("fenetre-article");
+const titreFormulaire = document.getElementById("titre-formulaire");
+const btnValiderArticle = document.getElementById("btn-valider-article");
+const btnSupprimerArticle = document.getElementById("btn-supprimer-article");
 const selectRepas = document.getElementById("select-repas");
 const btnAjouterRepas = document.getElementById("btn-ajouter-repas");
 const popupInfo = document.getElementById("popup-info");
@@ -381,18 +384,20 @@ function afficher() {
                 afficherPopup(e, article.prixKg.toFixed(2) + " €/kg");
             });
 
-            const tdSuppr = document.createElement("td");
-            const btnSuppr = document.createElement("button");
-            btnSuppr.textContent = "✕";
-            btnSuppr.type = "button";
-            btnSuppr.addEventListener("click", async function () {
-                repas[m].articles.splice(i, 1);
-                await sauvegarder();
-                afficher();
+            // Crayon : ouvre la fenêtre de modification de cet article
+            const tdModif = document.createElement("td");
+            const btnModif = document.createElement("button");
+            btnModif.textContent = "✏️";
+            btnModif.type = "button";
+            btnModif.className = "btn-modifier";
+            btnModif.title = "Modifier ou supprimer";
+            btnModif.addEventListener("click", function (e) {
+                e.stopPropagation();
+                ouvrirFormulaireModification(m, i);
             });
-            tdSuppr.appendChild(btnSuppr);
+            tdModif.appendChild(btnModif);
 
-            tr.append(tdNom, tdGrammes, tdKcalCalc, tdProtCalc, tdPrixCalc, tdSuppr);
+            tr.append(tdNom, tdGrammes, tdKcalCalc, tdProtCalc, tdPrixCalc, tdModif);
             listeArticles.appendChild(tr);
         }
     }
@@ -408,9 +413,53 @@ function afficher() {
 }
 
 // =====================================================================
-// 6. Ajout d'un article
+// 6. Fenêtre "article" : ajout ou modification
 // =====================================================================
-bouton.addEventListener("click", async function () {
+// null = on ajoute un nouvel article ; { repas: m, article: i } = on modifie celui-là
+let articleEnModification = null;
+
+function viderFormulaire() {
+    for (const input of tousLesInputs) {
+        input.value = "";
+    }
+    effacerErreurs();
+    mettreAJourBoutonEffacer();
+    messageProduit.classList.add("cache");
+}
+
+function ouvrirFormulaireAjout() {
+    articleEnModification = null;
+    viderFormulaire();
+    titreFormulaire.textContent = "Nouvel article";
+    btnValiderArticle.textContent = "✓ Ajouter";
+    btnSupprimerArticle.classList.add("cache");
+    fenetreArticle.classList.remove("cache");
+}
+
+function ouvrirFormulaireModification(m, i) {
+    const article = repas[m].articles[i];
+    articleEnModification = { repas: m, article: i };
+    viderFormulaire();
+    inputAliment.value = article.nom;
+    inputGrammes.value = article.grammes;
+    inputCalories.value = article.kcal100;
+    inputProteines.value = article.prot100;
+    inputPrixKg.value = article.prixKg;
+    selectRepas.value = m;
+    mettreAJourBoutonEffacer();
+    titreFormulaire.textContent = "Modifier l'article";
+    btnValiderArticle.textContent = "✓ Enregistrer";
+    btnSupprimerArticle.classList.remove("cache");
+    fenetreArticle.classList.remove("cache");
+}
+
+function fermerFormulaire() {
+    fermerFenetre(fenetreArticle);
+    articleEnModification = null;
+}
+
+// Vérifie les champs et renvoie l'article, ou null s'il y a une erreur
+function lireFormulaire() {
     const nomAliment = inputAliment.value;
     const grammes = parseFloat(inputGrammes.value) || 0;
     const kcal100 = parseFloat(inputCalories.value) || 0;
@@ -441,7 +490,7 @@ bouton.addEventListener("click", async function () {
         aUneErreur = true;
     }
     if (aUneErreur) {
-        return;
+        return null;
     }
 
     // 1 g de protéine = 4 kcal : si les protéines dépassent les kcal, c'est une faute de frappe
@@ -449,31 +498,64 @@ bouton.addEventListener("click", async function () {
     if (kcalDesProteines > kcal100 + 5) {
         const continuer = confirm(
             `Attention : ${prot100} g de protéines donnent déjà ${kcalDesProteines} kcal, `
-            + `mais tu as mis ${kcal100} kcal / 100 g. Vérifie l'étiquette.\n\nAjouter quand même ?`
+            + `mais tu as mis ${kcal100} kcal / 100 g. Vérifie l'étiquette.\n\nEnregistrer quand même ?`
         );
         if (!continuer) {
-            return;
+            return null;
         }
     }
 
-    const indexRepas = parseInt(selectRepas.value, 10) || 0;
-    repas[indexRepas].articles.push({
+    return {
         nom: nomAliment.trim(),
         grammes: grammes,
         kcal100: kcal100,
         prot100: prot100,
         prixKg: prixKg
-    });
+    };
+}
+
+// Bouton vert ✓ : ajoute ou enregistre les modifications
+btnValiderArticle.addEventListener("click", async function () {
+    const article = lireFormulaire();
+    if (!article) {
+        return;
+    }
+    const repasChoisi = parseInt(selectRepas.value, 10) || 0;
+
+    if (articleEnModification === null) {
+        repas[repasChoisi].articles.push(article);
+    } else {
+        const { repas: m, article: i } = articleEnModification;
+        if (m === repasChoisi) {
+            repas[m].articles[i] = article;          // même repas : on remplace
+        } else {
+            repas[m].articles.splice(i, 1);          // repas changé : on déplace
+            repas[repasChoisi].articles.push(article);
+        }
+    }
 
     await sauvegarder();
     afficher();
-
-    for (const input of tousLesInputs) {
-        input.value = "";
-    }
-    mettreAJourBoutonEffacer();
-    messageProduit.classList.add("cache");
+    fermerFormulaire();
 });
+
+// Bouton rouge ✕ : supprime l'article en cours de modification
+btnSupprimerArticle.addEventListener("click", async function () {
+    if (articleEnModification === null) {
+        return;
+    }
+    const { repas: m, article: i } = articleEnModification;
+    if (!confirm(`Supprimer « ${repas[m].articles[i].nom} » ?`)) {
+        return;
+    }
+    repas[m].articles.splice(i, 1);
+    await sauvegarder();
+    afficher();
+    fermerFormulaire();
+});
+
+document.getElementById("btn-ouvrir-ajout").addEventListener("click", ouvrirFormulaireAjout);
+document.getElementById("btn-annuler-article").addEventListener("click", fermerFormulaire);
 
 // =====================================================================
 // 7. Ajout d'un repas
@@ -717,22 +799,8 @@ function blobVersTexte(blob) {
     });
 }
 
-// Donne un fichier à l'utilisateur : partage (Drive, WhatsApp, mail…) ou téléchargement
-async function livrerFichier(blob, nomFichier, partager) {
-    if (partager) {
-        const fichier = new File([blob], nomFichier, { type: blob.type });
-        if (navigator.canShare && navigator.canShare({ files: [fichier] })) {
-            try {
-                await navigator.share({ files: [fichier], title: nomFichier });
-            } catch (e) {
-                if (e.name !== "AbortError") {
-                    alert("Partage impossible : " + e.message);
-                }
-            }
-            return;
-        }
-        alert("Le partage n'est pas disponible ici : le fichier va être téléchargé.");
-    }
+// Télécharge un fichier dans le dossier Téléchargements du téléphone
+function telechargerFichier(blob, nomFichier) {
     const lien = document.createElement("a");
     lien.href = URL.createObjectURL(blob);
     lien.download = nomFichier;
@@ -740,6 +808,33 @@ async function livrerFichier(blob, nomFichier, partager) {
     lien.click();
     lien.remove();
     setTimeout(() => URL.revokeObjectURL(lien.href), 10000);
+}
+
+// Donne un fichier à l'utilisateur : partage (Drive, WhatsApp, mail…) ou téléchargement.
+// Chrome Android ne partage que certains types de fichiers (.txt oui, .json non) :
+// les fichiers à partager sont donc toujours envoyés en .txt.
+async function livrerFichier(blob, nomFichier, partager) {
+    if (!partager) {
+        telechargerFichier(blob, nomFichier);
+        return;
+    }
+    const nomPartage = nomFichier.replace(/\.json$/, ".txt");
+    const fichier = new File([blob], nomPartage, { type: "text/plain" });
+
+    if (navigator.canShare && navigator.canShare({ files: [fichier] })) {
+        try {
+            await navigator.share({ files: [fichier] });
+            return;
+        } catch (e) {
+            if (e.name === "AbortError") {
+                return; // l'utilisateur a fermé la fenêtre de partage
+            }
+        }
+    }
+    // Partage refusé ou impossible : on télécharge à la place
+    telechargerFichier(blob, nomFichier);
+    alert("Le partage n'a pas marché sur ce téléphone. Le fichier a été mis dans Téléchargements : "
+        + "tu peux l'envoyer sur Drive depuis l'appli Drive (bouton + puis Importer).");
 }
 
 // ---- Sauvegarde complète (.json) ----
